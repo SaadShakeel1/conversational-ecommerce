@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: conversational_ecommerce
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    env_file: ../.env
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/conversational_ecommerce
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # Frontend: usually run with `npm run dev` locally; uncomment to run in Docker
+  # frontend:
+  #   build:
+  #     context: ..
+  #     dockerfile: infra/Dockerfile.frontend
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     NEXT_PUBLIC_API_URL: http://localhost:8000
+  #   depends_on:
+  #     - backend
+
+volumes:
+  postgres_data:
