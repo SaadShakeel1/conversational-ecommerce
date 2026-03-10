@@ -1,11 +1,25 @@
-"""App settings from environment."""
-import os
+"""App settings using Pydantic."""
+from pydantic_settings import BaseSettings
 
 
-class Settings:
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/conversational_ecommerce")
-    vector_db_api_key: str = os.getenv("VECTOR_DB_API_KEY", "")
-    llm_api_key: str = os.getenv("LLM_API_KEY", "")
+class Settings(BaseSettings):
+    # Neon Postgres connection string (can be overridden via env var)
+    database_url: str = (
+        "postgresql://neondb_owner:npg_Grg2UqDMkR9a@ep-calm-voice-ae8c990k-pooler.c-2.us-east-2.aws.neon.tech/"
+        "neondb?sslmode=require&channel_binding=require"
+    )
+    vector_db_api_key: str = ""
+    llm_api_key: str = ""
+
+    # JWT auth settings
+    jwt_secret_key: str = "CHANGE_ME_SUPER_SECRET"  # override via env in production
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expires_minutes: int = 60
+
+    class Config:
+        env_prefix = ""
+        env_file = ".env"
+        env_file_encoding = "utf-8"
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[arg-type]
