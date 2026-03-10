@@ -1,0 +1,27 @@
+# Python / backend
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Alembic / migration artifacts
+alembic/*.log
+
+# Node / frontend
+node_modules/
+.next/
+dist/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
+
