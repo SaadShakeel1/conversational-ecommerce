@@ -1,5 +1,6 @@
 """Cart item model."""
 from sqlalchemy import Column, Integer, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 
@@ -11,3 +12,7 @@ class CartItem(Base):
     cart_id = Column(Integer, ForeignKey("carts.id"), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, default=1)
+
+    # Relationships
+    cart = relationship("Cart", back_populates="items")
+    product = relationship("Product", back_populates="cart_items", lazy="joined")

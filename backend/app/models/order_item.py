@@ -1,5 +1,6 @@
 """Order item model."""
 from sqlalchemy import Column, Integer, ForeignKey, Numeric
+from sqlalchemy.orm import relationship
 
 from app.db.base import Base
 
@@ -12,3 +13,7 @@ class OrderItem(Base):
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, default=1)
     price = Column(Numeric(10, 2))
+
+    # Relationships
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product", back_populates="order_items", lazy="joined")
