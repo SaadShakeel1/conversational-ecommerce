@@ -1,19 +1,23 @@
 """Product listing, details, comparison."""
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from sqlalchemy.orm import Session
 from typing import Any, Optional, List
 from decimal import Decimal
 
+from app.core.rate_limiter import limiter
 from app.db.session import get_db
 from app.schemas.product import ProductOut
 from app.services import search_service, comparison_service
 from app.services import related_service
+from app.services import bundling_service
 
 router = APIRouter()
 
 
 @router.get("/search", response_model=list[ProductOut])
+@limiter.limit("60/minute")
 def product_search(
+    request: Request,
     q: str | None = Query(None),
     min_price: Optional[Decimal] = Query(None),
     max_price: Optional[Decimal] = Query(None),
@@ -88,10 +92,24 @@ def product_specs(
 
 
 @router.get("/{product_id}/related", response_model=list[ProductOut])
+@limiter.limit("60/minute")
 def product_related(
+    request: Request,
     product_id: int,
     limit: int = Query(6, ge=1, le=20),
     db: Session = Depends(get_db),
 ):
     products = related_service.get_related_products(db, product_id, limit=limit)
+    return list(products)
+
+
+@router.get("/{product_id}/bundle", response_model=list[ProductOut])
+@limiter.limit("60/minute")
+def product_bundle(
+    request: Request,
+    product_id: int,
+    limit: int = Query(3, ge=1, le=10),
+    db: Session = Depends(get_db),
+):
+    products = bundling_service.suggest_bundle(db, product_id, limit=limit)
     return list(products)
