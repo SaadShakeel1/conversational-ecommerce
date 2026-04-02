@@ -1,5 +1,5 @@
 """Product model with JSONB specs."""
-from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, Text, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -16,7 +16,8 @@ class Product(Base):
     color = Column(String(64))
     size = Column(String(64))
     category = Column(String(128))
-    specs = Column(JSONB)  # materials, dimensions, etc.
+    # Use JSONB in Postgres; fall back to generic JSON for SQLite (tests).
+    specs = Column(JSONB().with_variant(JSON, "sqlite"))  # materials, dimensions, etc.
     model_tag = Column(String(128))  # for compatibility e.g. phone model
 
     # Relationships
