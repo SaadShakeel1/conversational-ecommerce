@@ -42,14 +42,14 @@ def product_search(
     return products
 
 
-@router.get("/compare", response_model=list[ProductOut])
+@router.get("/compare", response_model=dict[str, list[ProductOut]])
 def product_compare(
     ids: str = Query(..., description="Comma-separated product ids"),
     db: Session = Depends(get_db),
 ):
     id_list = [int(i.strip()) for i in ids.split(",") if i.strip()]
     products = comparison_service.compare_products(db, id_list)
-    return products
+    return {"products": list(products)}
 
 
 @router.get("/{product_id}", response_model=ProductOut | None)

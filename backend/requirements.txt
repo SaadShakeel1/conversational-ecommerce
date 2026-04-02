@@ -10,3 +10,4 @@ langchain-openai>=0.0.5
 # Optional: pinecone-client or chromadb when using those backends
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+pinecone
