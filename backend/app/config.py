@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o-mini"
     llm_temperature: float = 0.0
 
+    # Basic API hardening
+    chat_max_message_length: int = 2000
+    cors_allow_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+
     class Config:
         env_prefix = ""
         # Make env loading deterministic regardless of where uvicorn/alembic is launched from.

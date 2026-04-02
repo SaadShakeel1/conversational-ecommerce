@@ -63,12 +63,15 @@ class PineconeVectorStore(VectorStore):
             # Lazy import so this module remains importable if pinecone isn't installed.
             from pinecone import Pinecone
 
-            self._pc = Pinecone(api_key=self._api_key, host=self._host)
+            # Control-plane client; data-plane host is provided when creating Index().
+            self._pc = Pinecone(api_key=self._api_key)
         return self._pc
 
     def _get_index(self):
         if self._index is None:
-            self._index = self._get_client().Index(self._index_name)
+            # Data-plane Index: host identifies the index endpoint.
+            # (index_name is kept for reference/clarity; host is the authoritative routing.)
+            self._index = self._get_client().Index(host=self._host)
         return self._index
 
     def add(
