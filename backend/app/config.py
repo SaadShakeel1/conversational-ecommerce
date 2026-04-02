@@ -1,4 +1,6 @@
 """App settings using Pydantic."""
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
 
 
@@ -18,7 +20,9 @@ class Settings(BaseSettings):
 
     class Config:
         env_prefix = ""
-        env_file = ".env"
+        # Make env loading deterministic regardless of where uvicorn/alembic is launched from.
+        # This resolves to: backend/.env (since this file lives in backend/app/).
+        env_file = str(Path(__file__).resolve().parents[1] / ".env")
         env_file_encoding = "utf-8"
 
 
