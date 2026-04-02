@@ -37,7 +37,11 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = ""
         # Make env loading deterministic regardless of where uvicorn/alembic is launched from.
+<<<<<<< Bilal_Work
         # This resolves to: backend/.env.
+=======
+        # This resolves to: backend/.env (since this file lives in backend/app/).
+>>>>>>> main
         env_file = str(Path(__file__).resolve().parents[1] / ".env")
         env_file_encoding = "utf-8"
 
