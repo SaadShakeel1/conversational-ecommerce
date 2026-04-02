@@ -22,6 +22,8 @@ def search_products(
     color: Optional[str] = None,
     size: Optional[str] = None,
     category: Optional[str] = None,
+    spec_key: Optional[str] = None,
+    spec_value: Optional[str] = None,
     tags: Optional[List[str]] = None,
     sort_by: Optional[str] = None,  # "price_asc", "price_desc", "popularity"
     limit: int = 20,
@@ -60,6 +62,12 @@ def search_products(
         query = query.filter(Product.size.ilike(size))
     if category:
         query = query.filter(Product.category.ilike(f"%{category}%"))
+
+    # JSONB specs filtering (Feature #11)
+    if spec_key:
+        query = query.filter(Product.specs.has_key(spec_key))  # noqa: W601
+        if spec_value:
+            query = query.filter(Product.specs[spec_key].astext.ilike(f"%{spec_value}%"))
 
     # Tag filtering
     if tags:

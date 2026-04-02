@@ -12,4 +12,5 @@ from app.models.order import Order
 from app.models.order_item import OrderItem
 from app.models.faq import FAQ
 from app.models.promo_code import PromoCode
+from app.models.chat_session import ChatSession
 

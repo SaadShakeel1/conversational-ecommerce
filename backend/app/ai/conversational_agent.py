@@ -17,10 +17,12 @@ from app.services import (
     promo_service,
     search_service,
 )
+from app.services import related_service
 from app.models.inventory import Inventory
+from app.models.chat_session import ChatSession
 
 
-# NOTE: This is demo-only state. For correctness across restarts/workers, persist to DB/Redis.
+# NOTE: In-memory cache for quick lookups; DB is the source of truth.
 _SESSION_CART_IDS: Dict[str, int] = {}
 
 
@@ -144,7 +146,21 @@ def _get_or_create_session_cart_id(db: Session, session_id: Optional[str]) -> in
     key = session_id or "anonymous"
     if key in _SESSION_CART_IDS:
         return _SESSION_CART_IDS[key]
+
+    # DB-backed mapping so session carts survive restarts / multiple workers.
+    row = db.query(ChatSession).filter(ChatSession.session_id == key).first()
+    if row is not None and row.cart_id is not None:
+        _SESSION_CART_IDS[key] = int(row.cart_id)
+        return int(row.cart_id)
+
     cart = cart_service.get_or_create_cart(db, user_id=None)
+    if row is None:
+        row = ChatSession(session_id=key, cart_id=cart.id)
+        db.add(row)
+    else:
+        row.cart_id = cart.id
+    db.commit()
+
     _SESSION_CART_IDS[key] = cart.id
     return cart.id
 
@@ -217,6 +233,13 @@ def _looks_like_popularity_search(message: str) -> bool:
             "best ",
         ]
     )
+
+
+def _looks_like_related_items(message: str) -> bool:
+    msg = message.lower()
+    has_keyword = any(k in msg for k in ["related", "similar", "also like", "you may also like", "accessories"])
+    has_id = re.search(r"\b\d+\b", msg) is not None
+    return has_keyword and has_id
 
 
 def _remove_rank_tokens_for_q(q: str) -> str:
@@ -365,6 +388,14 @@ def _remove_filter_tokens_for_q(message: str) -> str:
     msg = re.sub(r"\b(?:tags?|tag)\s*[:=\-]?\s*[A-Za-z0-9,\s\-]+", " ", msg, flags=re.I)
     msg = re.sub(r"\s+", " ", msg).strip(" ,.-")
     return msg
+
+
+def _normalize_search_q(q: str) -> str:
+    """Remove common leading search filler words so `q` matches product text better."""
+    q2 = q.strip()
+    q2 = re.sub(r"^(?:find|show|search|look\s*for|looking\s*for|i\s*want|i\s*need|need|want|recommend)\b", " ", q2, flags=re.I)
+    q2 = re.sub(r"\s+", " ", q2).strip(" ,.-")
+    return q2
 
 
 async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
@@ -568,6 +599,28 @@ async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
             reply += f" ({discount:.0f}% off)"
         return ChatResponse(reply=reply, product_ids=[], follow_up_prompts=[])
 
+    if _looks_like_related_items(message):
+        product_id = _extract_first_int(message)
+        if not product_id:
+            return ChatResponse(
+                reply="Which product id should I find related items for?",
+                product_ids=[],
+                follow_up_prompts=["Send a product id (e.g., related items for product id 175)."],
+            )
+        products = related_service.get_related_products(db, product_id, limit=6)
+        related_ids = [p.id for p in products if getattr(p, "id", None) is not None]
+        if not related_ids:
+            return ChatResponse(
+                reply=f"I couldn't find related items for product id {product_id}.",
+                product_ids=[],
+                follow_up_prompts=[],
+            )
+        return ChatResponse(
+            reply="Here are some related items you might like.",
+            product_ids=related_ids,
+            follow_up_prompts=["Want to narrow by price, color, or size?"],
+        )
+
     if _looks_like_faq_question(message):
         faqs = faq_service.search_faqs(db, query=message, limit=3)
         if faqs:
@@ -586,6 +639,7 @@ async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
     min_price, max_price = _extract_price_bounds(message)
     color, size, category, tags = _extract_color_size_category_tags(message)
     q_candidate = _remove_filter_tokens_for_q(message)
+    q_candidate = _normalize_search_q(q_candidate)
     q: Optional[str] = q_candidate if q_candidate and len(q_candidate) >= 2 else None
     filters_used = any([min_price is not None, max_price is not None, color is not None, size is not None, category is not None, tags is not None])
 
@@ -603,7 +657,8 @@ async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
             offset=0,
         )
     else:
-        products = search_service.search_products(db, q=message, limit=5, offset=0)
+        q2 = _normalize_search_q(message)
+        products = search_service.search_products(db, q=q2, limit=5, offset=0)
     product_ids = [p.id for p in products if getattr(p, "id", None) is not None]
     if not product_ids:
         return ChatResponse(reply="I couldn't find matching products. Try adding a color, size, or category.", product_ids=[], follow_up_prompts=get_guided_follow_ups("search_broad", {"message": message}))
