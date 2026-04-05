@@ -27,23 +27,20 @@ class StubLLMClient(LLMClient):
         yield await self.complete(prompt, **kwargs)
 
 
-class OpenAILLMClient(LLMClient):
-    """OpenAI chat model via LangChain."""
+class GroqLLMClient(LLMClient):
+    """Groq chat model via LangChain."""
 
-    def __init__(self, *, api_key: str, model: str, temperature: float) -> None:
-        self._api_key = api_key
-        self._model = model
-        self._temperature = temperature
+    def __init__(self) -> None:
         self._llm = None
 
     def _get_llm(self):
         if self._llm is None:
-            from langchain_openai import ChatOpenAI
+            import os
+            from langchain_groq import ChatGroq
 
-            self._llm = ChatOpenAI(
-                api_key=self._api_key,
-                model=self._model,
-                temperature=self._temperature,
+            self._llm = ChatGroq(
+                groq_api_key=os.environ.get("GROQ_API_KEY"),
+                model_name="llama3-70b-8192"
             )
         return self._llm
 
@@ -59,10 +56,7 @@ class OpenAILLMClient(LLMClient):
 
 
 def get_llm_client() -> LLMClient:
-    if not settings.llm_api_key:
+    import os
+    if not os.environ.get("GROQ_API_KEY"):
         return StubLLMClient()
-    return OpenAILLMClient(
-        api_key=settings.llm_api_key,
-        model=settings.llm_model,
-        temperature=settings.llm_temperature,
-    )
+    return GroqLLMClient()

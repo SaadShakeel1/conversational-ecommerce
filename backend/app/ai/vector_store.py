@@ -40,39 +40,23 @@ class StubVectorStore(VectorStore):
         return {"total_vector_count": len(self._store)}
 
 
-class PineconeVectorStore(VectorStore):
-    """Vector store backed by Pinecone."""
+class ChromaVectorStore(VectorStore):
+    """Vector store backed by entirely local ChromaDB."""
 
-    def __init__(
-        self,
-        *,
-        api_key: str,
-        index_name: str,
-        host: str,
-        namespace: str = "default",
-    ) -> None:
-        self._api_key = api_key
-        self._index_name = index_name
-        self._host = host
-        self._namespace = namespace
-        self._pc = None
-        self._index = None
+    def __init__(self, persist_dir: str) -> None:
+        self.persist_dir = persist_dir
+        self._collection = None
 
-    def _get_client(self):
-        if self._pc is None:
-            # Lazy import so this module remains importable if pinecone isn't installed.
-            from pinecone import Pinecone
-
-            # Control-plane client; data-plane host is provided when creating Index().
-            self._pc = Pinecone(api_key=self._api_key)
-        return self._pc
-
-    def _get_index(self):
-        if self._index is None:
-            # Data-plane Index: host identifies the index endpoint.
-            # (index_name is kept for reference/clarity; host is the authoritative routing.)
-            self._index = self._get_client().Index(host=self._host)
-        return self._index
+    def _get_collection(self):
+        if self._collection is None:
+            import chromadb
+            # Use persistent client so we don't lose data
+            client = chromadb.PersistentClient(path=self.persist_dir)
+            self._collection = client.get_or_create_collection(
+                name="ecommerce_vectors",
+                metadata={"hnsw:space": "cosine"}
+            )
+        return self._collection
 
     def add(
         self,
@@ -82,19 +66,14 @@ class PineconeVectorStore(VectorStore):
     ) -> None:
         if len(ids) != len(embeddings):
             raise ValueError("ids and embeddings must have the same length")
-        if metadatas is not None and len(metadatas) != len(ids):
-            raise ValueError("metadatas and ids must have the same length")
-
-        vectors = []
-        for i, vid in enumerate(ids):
-            meta = (metadatas or [{}])[i] if metadatas is not None else None
-            # Pinecone expects: (id, vector, metadata)
-            if meta is None:
-                vectors.append((vid, embeddings[i]))
-            else:
-                vectors.append((vid, embeddings[i], meta))
-
-        self._get_index().upsert(vectors=vectors, namespace=self._namespace)
+            
+        metadatas = metadatas or [{} for _ in ids]
+        
+        self._get_collection().upsert(
+            ids=ids,
+            embeddings=embeddings,
+            metadatas=metadatas
+        )
 
     def search(
         self,
@@ -103,46 +82,33 @@ class PineconeVectorStore(VectorStore):
         filter_dict: Optional[Dict[str, Any]] = None,
     ) -> List[Dict[str, Any]]:
         kwargs: Dict[str, Any] = {
-            "vector": query_embedding,
-            "top_k": top_k,
-            "include_metadata": True,
-            "namespace": self._namespace,
+            "query_embeddings": [query_embedding],
+            "n_results": top_k,
         }
         if filter_dict:
-            kwargs["filter"] = filter_dict
-
-        res = self._get_index().query(**kwargs)
-        matches = res.get("matches") if isinstance(res, dict) else getattr(res, "matches", [])
-
-        results: List[Dict[str, Any]] = []
-        for m in matches or []:
-            results.append(
-                {
-                    "id": m.get("id") if isinstance(m, dict) else getattr(m, "id", None),
-                    "score": m.get("score") if isinstance(m, dict) else getattr(m, "score", 0.0),
-                    "metadata": m.get("metadata") if isinstance(m, dict) else getattr(m, "metadata", {}) or {},
-                }
-            )
-        # Filter out null ids defensively
-        return [r for r in results if r["id"] is not None]
+            kwargs["where"] = filter_dict
+            
+        res = self._get_collection().query(**kwargs)
+        
+        results = []
+        if res and res.get("ids") and res["ids"][0]:
+            ids = res["ids"][0]
+            scores = res["distances"][0] if res.get("distances") else [0.0]*len(ids)
+            metas = res["metadatas"][0] if res.get("metadatas") else [{}]*len(ids)
+            
+            for i in range(len(ids)):
+                results.append({
+                    "id": ids[i],
+                    "score": 1.0 - scores[i],  # convert distance to score roughly
+                    "metadata": metas[i] or {}
+                })
+        return results
 
     def describe_stats(self) -> Dict[str, Any]:
-        # Pinecone returns a dict containing total_vector_count and index properties.
-        return self._get_index().describe_index_stats()
+        count = self._get_collection().count()
+        return {"total_vector_count": count}
 
 
 def get_vector_store() -> VectorStore:
-    """Factory using configured settings (Pinecone). Raises if misconfigured."""
-    if not settings.vector_db_api_key:
-        raise ValueError("VECTOR_DB_API_KEY is required for Pinecone.")
-    if not settings.pinecone_index_name:
-        raise ValueError("PINECONE_INDEX_NAME is required for Pinecone vector store.")
-    if not settings.pinecone_host:
-        raise ValueError("PINECONE_HOST is required for Pinecone vector store (host URL).")
-
-    return PineconeVectorStore(
-        api_key=settings.vector_db_api_key,
-        index_name=settings.pinecone_index_name,
-        host=settings.pinecone_host,
-        namespace=settings.pinecone_namespace,
-    )
+    """Factory using configured settings for Chroma DB."""
+    return ChromaVectorStore(persist_dir=settings.chroma_persist_dir)

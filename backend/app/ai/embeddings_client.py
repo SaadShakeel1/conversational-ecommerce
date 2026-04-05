@@ -28,11 +28,10 @@ class StubEmbeddingsClient(EmbeddingsClient):
         return [0.0] * 384
 
 
-class OpenAIEmbeddingsClient(EmbeddingsClient):
-    """OpenAI embeddings via LangChain."""
+class HuggingFaceEmbeddingsClient(EmbeddingsClient):
+    """HuggingFace embeddings via LangChain."""
 
-    def __init__(self, *, api_key: str, model: str, expected_dimension: int) -> None:
-        self._api_key = api_key
+    def __init__(self, *, model: str, expected_dimension: int) -> None:
         self._model = model
         self._expected_dimension = expected_dimension
         self._embeddings = None
@@ -41,11 +40,10 @@ class OpenAIEmbeddingsClient(EmbeddingsClient):
     def _get_client(self):
         if self._embeddings is None:
             # Lazy import so the module can still be imported without optional deps at dev-time.
-            from langchain_openai import OpenAIEmbeddings
+            from langchain_huggingface import HuggingFaceEmbeddings
 
-            self._embeddings = OpenAIEmbeddings(
-                model=self._model,
-                api_key=self._api_key,
+            self._embeddings = HuggingFaceEmbeddings(
+                model_name=self._model
             )
         return self._embeddings
 
@@ -76,11 +74,8 @@ def get_embeddings_client() -> EmbeddingsClient:
     Factory using configured settings.
     Raises if EMBEDDINGS/Vector DB prerequisites are missing.
     """
-    if not settings.llm_api_key:
-        raise ValueError("LLM_API_KEY is required to compute embeddings (OpenAI).")
-
-    return OpenAIEmbeddingsClient(
-        api_key=settings.llm_api_key,
+    # We no longer need an API key for local HuggingFace embeddings
+    return HuggingFaceEmbeddingsClient(
         model=settings.embedding_model,
         expected_dimension=settings.embedding_dimension,
     )

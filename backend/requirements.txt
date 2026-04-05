@@ -6,10 +6,12 @@ alembic>=1.13.0
 psycopg2-binary>=2.9.0
 # Proposal §2.3.1: LangChain for RAG orchestration; Pinecone/ChromaDB for vector store
 langchain>=0.1.0
-langchain-openai>=0.0.5
+langchain-huggingface>=0.0.3
+sentence-transformers>=3.0.1
 # Optional: pinecone-client or chromadb when using those backends
 python-jose[cryptography]>=3.3.0
 passlib[bcrypt]>=1.7.4
+bcrypt<4.0.0
 pinecone
 slowapi>=0.1.9
 # passlib 1.7.x expects older bcrypt metadata; pin for compatibility
