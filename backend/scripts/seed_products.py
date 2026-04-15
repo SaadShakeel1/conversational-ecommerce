@@ -299,7 +299,7 @@ def seed():
         if not demo:
             demo = User(
                 email="demo@store.com",
-                password_hash=get_password_hash("demo1234"),
+                hashed_password=get_password_hash("demo1234"),
                 is_active=True,
             )
             db.add(demo)

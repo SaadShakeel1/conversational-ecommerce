@@ -16,7 +16,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     user = db.query(User).filter(User.email == email).first()
     if not user:
         return None
-    if not verify_password(password, user.password_hash): # Changed from user.hashed_password to user.password_hash
+    if not verify_password(password, user.hashed_password):
         return None
     return user
 
@@ -27,7 +27,7 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)) -> UserOut
     if existing:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Email already registered")
 
-    user = User(email=user_in.email, password_hash=get_password_hash(user_in.password))
+    user = User(email=user_in.email, hashed_password=get_password_hash(user_in.password))
     db.add(user)
     db.commit()
     db.refresh(user)

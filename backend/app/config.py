@@ -5,12 +5,8 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Neon Postgres connection string (can be overridden via env var)
-    database_url: str = (
-        "postgresql://neondb_owner:npg_Grg2UqDMkR9a@ep-calm-voice-ae8c990k-pooler.c-2.us-east-2.aws.neon.tech/"
-        "neondb?sslmode=require&channel_binding=require"
-    )
-    llm_api_key: str = ""
+    # Required from environment (.env or process env)
+    database_url: str
     groq_api_key: str = ""
     
     # Chroma Vector DB configuration
@@ -26,7 +22,7 @@ class Settings(BaseSettings):
     jwt_access_token_expires_minutes: int = 60
 
     # LLM configuration (used for grounded RAG responses)
-    llm_model: str = "gpt-4o-mini"
+    llm_model: str = "llama3-70b-8192"
     llm_temperature: float = 0.0
 
     # Basic API hardening
@@ -36,8 +32,8 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = ""
         # Make env loading deterministic regardless of where uvicorn/alembic is launched from.
-        # This resolves to: backend/.env (since this file lives in backend/app/).
-        env_file = str(Path(__file__).resolve().parents[1] / ".env")
+        # This resolves to: project_root/.env (since this file lives in backend/app/).
+        env_file = str(Path(__file__).resolve().parents[2] / ".env")
         env_file_encoding = "utf-8"
 
 
