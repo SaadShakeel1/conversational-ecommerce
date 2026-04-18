@@ -35,7 +35,7 @@ def upgrade() -> None:
         sa.Column("color", sa.String(64), nullable=True),
         sa.Column("size", sa.String(64), nullable=True),
         sa.Column("category", sa.String(128), nullable=True),
-        sa.Column("specs", postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+        sa.Column("specs", sa.JSON(), nullable=True),
         sa.Column("model_tag", sa.String(128), nullable=True),
         sa.PrimaryKeyConstraint("id"),
     )
@@ -84,7 +84,7 @@ def upgrade() -> None:
         sa.Column("user_id", sa.Integer(), nullable=True),
         sa.Column("order_status", sa.String(64), nullable=True),
         sa.Column("total", sa.Numeric(10, 2), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.text("now()"), nullable=True),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=True),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )

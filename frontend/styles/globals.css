@@ -1,3 +1,150 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-surface-900 text-gray-100 font-sans antialiased;
+    background-image:
+      radial-gradient(ellipse at top, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(0, 255, 136, 0.02) 0%, transparent 50%);
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background-color: rgba(0, 255, 136, 0.2);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #111111;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333333;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00e66d;
+  }
+}
+
+@layer components {
+  /* ─── Glass Card ─── */
+  .glass-card {
+    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-500/30 rounded-2xl;
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    @apply border-neon-green/30 shadow-glow -translate-y-1;
+  }
+
+  /* ─── Neon Buttons ─── */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+      bg-gradient-to-r from-brand-500 to-neon-green text-surface-900
+      hover:shadow-glow-lg hover:scale-[1.02]
+      active:scale-[0.98]
+      transition-all duration-200 ease-out
+      disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
+      bg-surface-700 text-gray-200 border border-surface-400/50
+      hover:border-neon-green/40 hover:text-neon-green hover:shadow-glow-sm
+      active:scale-[0.98]
+      transition-all duration-200 ease-out
+      disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
+      text-gray-400 hover:text-neon-green hover:bg-surface-700/50
+      transition-all duration-200;
+  }
+
+  /* ─── Input Fields ─── */
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl bg-surface-700/80 border border-surface-400/40 text-gray-100
+      placeholder:text-gray-500
+      focus:outline-none focus:border-neon-green/60 focus:ring-2 focus:ring-neon-green/20
+      transition-all duration-200;
+  }
+
+  /* ─── Badge / Tag ─── */
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+      bg-neon-green/10 text-neon-green border border-neon-green/20;
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
+      bg-surface-600 text-gray-300 border border-surface-400/40;
+  }
+
+  /* ─── Section Containers ─── */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* ─── Page Header ─── */
+  .page-header {
+    @apply text-center py-12 sm:py-16;
+  }
+
+  .page-title {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-display font-bold
+      bg-gradient-to-r from-white via-brand-200 to-neon-green bg-clip-text text-transparent;
+  }
+
+  .page-subtitle {
+    @apply mt-4 text-gray-400 text-base sm:text-lg max-w-2xl mx-auto;
+  }
+
+  /* ─── Skeleton Loading ─── */
+  .skeleton {
+    @apply bg-gradient-to-r from-surface-700 via-surface-600 to-surface-700 bg-[length:200%_100%] rounded-lg animate-shimmer;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    @apply h-px bg-gradient-to-r from-transparent via-surface-400/50 to-transparent;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-300 to-neon-green bg-clip-text text-transparent;
+  }
+
+  .neon-border {
+    @apply border border-neon-green/30;
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+  }
+}

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
 
     class Config:
         env_prefix = ""
+        extra = "ignore"
+        extra = "ignore"
         # Make env loading deterministic regardless of where uvicorn/alembic is launched from.
         # This resolves to: project_root/.env (since this file lives in backend/app/).
         env_file = str(Path(__file__).resolve().parents[2] / ".env")

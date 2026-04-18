@@ -16,6 +16,7 @@ export interface CartItemOut {
   product_id: number;
   quantity: number;
   price: number;
+  name?: string;
 }
 
 export interface CartSummaryOut {
@@ -51,4 +52,30 @@ export interface ChatResponse {
   reply: string;
   product_ids: number[];
   follow_up_prompts: string[];
+}
+
+/** Auth types */
+export interface AuthUser {
+  id: number;
+  email: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  token_type: string;
+}
+
+export interface RegisterRequest {
+  email: string;
+  password: string;
+}
+
+/** Chat message for the UI */
+export interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  content: string;
+  product_ids?: number[];
+  follow_up_prompts?: string[];
+  timestamp: Date;
 }
