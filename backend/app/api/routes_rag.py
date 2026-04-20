@@ -14,15 +14,13 @@ def rag_status():
 
     - Does not require LLM key (we just report config + vector count if reachable).
     """
+    pinecone_configured = bool(settings.vector_db_api_key and settings.pinecone_index_name and settings.pinecone_host)
     out = {
-        "pinecone_configured": bool(settings.vector_db_api_key and settings.pinecone_index_name and settings.pinecone_host),
-        "llm_configured": bool(settings.llm_api_key),
+        "pinecone_configured": pinecone_configured,
+        "llm_configured": bool(settings.llm_api_key or settings.groq_api_key),
         "vector_count": None,
         "error": None,
     }
-
-    if not out["pinecone_configured"]:
-        return out
 
     try:
         from app.ai.vector_store import get_vector_store

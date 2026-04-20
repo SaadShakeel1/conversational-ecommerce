@@ -8,9 +8,16 @@ class Settings(BaseSettings):
     # Required from environment (.env or process env)
     database_url: str
     groq_api_key: str = ""
+    llm_api_key: str = ""
+    vector_db_api_key: str = ""
     
     # Chroma Vector DB configuration
     chroma_persist_dir: str = "./chroma_db"
+
+    # Pinecone vector DB configuration (optional for local/chroma mode)
+    pinecone_index_name: str = ""
+    pinecone_host: str = ""
+    pinecone_namespace: str = "default"
 
     # Embeddings configuration (must match Pinecone index dimension)
     embedding_model: str = "all-MiniLM-L6-v2"
@@ -22,7 +29,7 @@ class Settings(BaseSettings):
     jwt_access_token_expires_minutes: int = 60
 
     # LLM configuration (used for grounded RAG responses)
-    llm_model: str = "llama3-70b-8192"
+    llm_model: str = "llama-3.3-70b-versatile"
     llm_temperature: float = 0.0
 
     # Basic API hardening

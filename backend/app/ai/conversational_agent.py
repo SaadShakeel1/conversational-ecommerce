@@ -94,10 +94,8 @@ def _should_try_rag(message: str) -> bool:
 
 
 async def _try_rag_answer(message: str) -> Optional[tuple[str, List[int]]]:
-    # Guard: embeddings + LLM both require LLM_API_KEY in our current implementation.
-    if not settings.llm_api_key:
-        return None
-    if not settings.vector_db_api_key or not settings.pinecone_index_name or not settings.pinecone_host:
+    # Guard: only require LLM key; vector backend can be Pinecone or local Chroma.
+    if not (settings.llm_api_key or settings.groq_api_key):
         return None
 
     try:
@@ -138,6 +136,45 @@ async def _try_rag_answer(message: str) -> Optional[tuple[str, List[int]]]:
         llm = get_llm_client()
         reply = await llm.complete(prompt)
         return reply, unique_product_ids
+    except Exception:
+        return None
+
+
+async def _generate_ai_product_reply(message: str, products: list[Any]) -> Optional[str]:
+    """Use the LLM to turn product matches into a natural-language recommendation."""
+    if not products:
+        return None
+    if not (settings.llm_api_key or settings.groq_api_key):
+        return None
+    try:
+        from app.ai.llm_client import get_llm_client
+
+        lines: list[str] = []
+        for p in products[:5]:
+            name = getattr(p, "name", "Unknown")
+            category = getattr(p, "category", None) or "General"
+            price = getattr(p, "price", None)
+            description = (getattr(p, "description", "") or "").strip()
+            if len(description) > 120:
+                description = description[:117] + "..."
+            price_text = f"${float(price):.2f}" if price is not None else "N/A"
+            lines.append(f"- {name} | {category} | {price_text} | {description}")
+
+        prompt = (
+            "You are an e-commerce shopping assistant.\n"
+            "Given the user request and matching products, write a concise helpful response.\n"
+            "Rules:\n"
+            "- Mention 2-4 best matches by name.\n"
+            "- Explain why they fit.\n"
+            "- Keep it under 120 words.\n"
+            "- Do not invent product details.\n\n"
+            f"User request: {message}\n"
+            "Matching products:\n"
+            f"{chr(10).join(lines)}"
+        )
+        llm = get_llm_client()
+        reply = await llm.complete(prompt)
+        return reply.strip() if reply else None
     except Exception:
         return None
 
@@ -220,19 +257,16 @@ def _looks_like_review_search(message: str) -> bool:
 
 def _looks_like_popularity_search(message: str) -> bool:
     msg = message.lower()
-    return any(
-        k in msg
-        for k in [
-            "popular",
-            "most popular",
-            "best seller",
-            "best sellers",
-            "top rated",
-            "highly rated",
-            "top ",
-            "best ",
-        ]
-    )
+    patterns = [
+        r"\bpopular\b",
+        r"\bmost\s+popular\b",
+        r"\bbest\s+sellers?\b",
+        r"\btop\s+rated\b",
+        r"\bhighly\s+rated\b",
+        r"\btop\b",
+        r"\bbest\b",
+    ]
+    return any(re.search(p, msg) is not None for p in patterns)
 
 
 def _looks_like_related_items(message: str) -> bool:
@@ -396,6 +430,21 @@ def _normalize_search_q(q: str) -> str:
     q2 = re.sub(r"^(?:find|show|search|look\s*for|looking\s*for|i\s*want|i\s*need|need|want|recommend)\b", " ", q2, flags=re.I)
     q2 = re.sub(r"\s+", " ", q2).strip(" ,.-")
     return q2
+
+
+def _extract_keyword_query(message: str) -> Optional[str]:
+    """Fallback query extraction when free-form text doesn't match directly."""
+    tokens = re.findall(r"[a-zA-Z0-9]+", message.lower())
+    stop_words = {
+        "i", "me", "my", "a", "an", "the", "for", "to", "of", "in", "on", "with",
+        "and", "or", "under", "over", "below", "above", "recommend", "show", "find",
+        "search", "looking", "look", "want", "need", "help", "please",
+    }
+    keywords = [t for t in tokens if len(t) >= 3 and t not in stop_words]
+    if not keywords:
+        return None
+    # Prefer first specific keyword (e.g. "laptop" from "recommend a laptop for work").
+    return keywords[0]
 
 
 async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
@@ -661,6 +710,16 @@ async def handle_chat(body: ChatRequest, db: Session) -> ChatResponse:
         products = search_service.search_products(db, q=q2, limit=5, offset=0)
     product_ids = [p.id for p in products if getattr(p, "id", None) is not None]
     if not product_ids:
+        keyword_q = _extract_keyword_query(message)
+        if keyword_q:
+            products = search_service.search_products(db, q=keyword_q, limit=5, offset=0)
+            product_ids = [p.id for p in products if getattr(p, "id", None) is not None]
+    if not product_ids:
         return ChatResponse(reply="I couldn't find matching products. Try adding a color, size, or category.", product_ids=[], follow_up_prompts=get_guided_follow_ups("search_broad", {"message": message}))
+    ai_reply = await _generate_ai_product_reply(message, list(products))
     follow_ups = get_guided_follow_ups("search_broad", {"message": message}) if len(product_ids) >= 3 else []
-    return ChatResponse(reply="Here are some products that match your request. Want to narrow it down?", product_ids=product_ids, follow_up_prompts=follow_ups)
+    return ChatResponse(
+        reply=ai_reply or "Here are some products that match your request. Want to narrow it down?",
+        product_ids=product_ids,
+        follow_up_prompts=follow_ups,
+    )

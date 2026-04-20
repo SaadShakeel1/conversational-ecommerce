@@ -18,13 +18,18 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # In Neon, "is_active" may already exist; ensure at least "hashed_password".
+    # In Neon, auth fields may already exist; ensure required columns are present.
     op.add_column(
         "users",
         sa.Column("hashed_password", sa.String(length=255), nullable=False, server_default=""),
     )
+    op.add_column(
+        "users",
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
+    )
 
 
 def downgrade() -> None:
+    op.drop_column("users", "is_active")
     op.drop_column("users", "hashed_password")
 

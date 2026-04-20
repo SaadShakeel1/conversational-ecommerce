@@ -15,5 +15,6 @@ passlib[bcrypt]>=1.7.4
 bcrypt<4.0.0
 pinecone
 slowapi>=0.1.9
+python-multipart>=0.0.20
 # passlib 1.7.x expects older bcrypt metadata; pin for compatibility
 pytest>=8.0.0
