@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import type { CartItemOut, CartSummaryOut } from "@/lib/types";
 
 export default function CartSummary() {
+  const router = useRouter();
   const [cart, setCart] = useState<CartSummaryOut | null>(null);
   const [pending, setPending] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
+  const [checkingOut, setCheckingOut] = useState(false);
 
   const fetchCart = useCallback(async () => {
     setPending(true);
@@ -36,6 +39,19 @@ export default function CartSummary() {
       setError(e instanceof Error ? e.message : "Failed to remove item");
     } finally {
       setRemovingId(null);
+    }
+  };
+
+  const handleCheckout = async () => {
+    setCheckingOut(true);
+    setError(null);
+    try {
+      const order = await api.orders.checkout();
+      router.push(`/orders/track?orderId=${order.order_id}`);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "Checkout failed");
+    } finally {
+      setCheckingOut(false);
     }
   };
 
@@ -146,8 +162,12 @@ export default function CartSummary() {
             ${total.toFixed(2)}
           </span>
         </div>
-        <button className="btn-primary w-full mt-4">
-          Proceed to Checkout
+        <button
+          onClick={handleCheckout}
+          disabled={checkingOut}
+          className="btn-primary w-full mt-4 disabled:opacity-60"
+        >
+          {checkingOut ? "Processing order..." : "Proceed to Checkout"}
         </button>
       </div>
     </div>

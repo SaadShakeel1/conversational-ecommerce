@@ -28,6 +28,30 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   return res.json();
 }
 
+function normalizeProductPrice(product: ProductOut): ProductOut {
+  const rawPrice = (product as ProductOut & { price: number | string }).price;
+  const parsedPrice =
+    typeof rawPrice === "number" ? rawPrice : Number.parseFloat(rawPrice);
+
+  return {
+    ...product,
+    price: Number.isFinite(parsedPrice) ? parsedPrice : 0,
+  };
+}
+
+function normalizeOrderTrack(order: OrderTrackOut): OrderTrackOut {
+  if (order.total == null) return order;
+
+  const rawTotal = (order as OrderTrackOut & { total: number | string }).total;
+  const parsedTotal =
+    typeof rawTotal === "number" ? rawTotal : Number.parseFloat(rawTotal);
+
+  return {
+    ...order,
+    total: Number.isFinite(parsedTotal) ? parsedTotal : 0,
+  };
+}
+
 export const api = {
   chat: {
     post: (body: ChatRequest) =>
@@ -37,18 +61,27 @@ export const api = {
       }),
   },
   products: {
-    search: (params: { q?: string; limit?: number; offset?: number }) => {
+    search: async (params: { q?: string; limit?: number; offset?: number }) => {
       const sp = new URLSearchParams();
       if (params.q) sp.set("q", params.q);
       if (params.limit != null) sp.set("limit", String(params.limit));
       if (params.offset != null) sp.set("offset", String(params.offset));
-      return fetchApi<ProductOut[]>(`/api/products/search?${sp}`);
+      const products = await fetchApi<ProductOut[]>(`/api/products/search?${sp}`);
+      return products.map(normalizeProductPrice);
     },
-    get: (id: number) => fetchApi<ProductOut | null>(`/api/products/${id}`),
-    compare: (ids: number[]) =>
-      fetchApi<{ products: ProductOut[] }>(
+    get: async (id: number) => {
+      const product = await fetchApi<ProductOut | null>(`/api/products/${id}`);
+      return product ? normalizeProductPrice(product) : null;
+    },
+    compare: async (ids: number[]) => {
+      const response = await fetchApi<{ products: ProductOut[] }>(
         `/api/products/compare?ids=${ids.join(",")}`
-      ),
+      );
+      return {
+        ...response,
+        products: response.products.map(normalizeProductPrice),
+      };
+    },
   },
   cart: {
     summary: () => fetchApi<CartSummaryOut>("/api/cart/summary"),
@@ -63,10 +96,21 @@ export const api = {
       }),
   },
   orders: {
+    checkout: (params?: { promoCode?: string }) => {
+      const sp = new URLSearchParams();
+      if (params?.promoCode) sp.set("promo_code", params.promoCode);
+      const query = sp.toString();
+      return fetchApi<OrderTrackOut>(
+        `/api/orders/checkout${query ? `?${query}` : ""}`,
+        {
+          method: "POST",
+        }
+      ).then(normalizeOrderTrack);
+    },
     track: (orderId: number) =>
       fetchApi<OrderTrackOut | null>(
         `/api/orders/track?orderId=${orderId}`
-      ),
+      ).then((order) => (order ? normalizeOrderTrack(order) : null)),
     validatePromo: (code: string) =>
       fetchApi<PromoValidateOut>(
         `/api/orders/promo/validate?code=${encodeURIComponent(code)}`

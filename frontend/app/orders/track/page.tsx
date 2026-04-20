@@ -1,15 +1,47 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
+import { useSearchParams } from "next/navigation";
 import { api } from "@/lib/api";
 import type { OrderTrackOut } from "@/lib/types";
 
 export default function OrderTrackPage() {
+  const searchParams = useSearchParams();
   const [orderId, setOrderId] = useState("");
   const [result, setResult] = useState<OrderTrackOut | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+
+  useEffect(() => {
+    const orderIdFromQuery = searchParams.get("orderId");
+    if (!orderIdFromQuery) return;
+    const parsedId = Number(orderIdFromQuery);
+    if (parsedId > 0) {
+      setOrderId(String(parsedId));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!orderId || hasSearched) return;
+    const id = Number(orderId);
+    if (!id) return;
+
+    setPending(true);
+    setError(null);
+    setHasSearched(true);
+    (async () => {
+      try {
+        const data = await api.orders.track(id);
+        setResult(data);
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Tracking failed");
+        setResult(null);
+      } finally {
+        setPending(false);
+      }
+    })();
+  }, [orderId, hasSearched]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
