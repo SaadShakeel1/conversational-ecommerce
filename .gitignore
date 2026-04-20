@@ -25,3 +25,7 @@ Thumbs.db
 .idea/
 .vscode/
 
+# Local runtime data (do not commit)
+backend/conversational_ecommerce.db
+backend/chroma_db/
+
