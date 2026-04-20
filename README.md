@@ -14,12 +14,17 @@ RAG-powered e-commerce with natural language search. **Aligned with project prop
 
 ### 1. Environment
 
-Copy env and set keys (optional for local stub behaviour):
+Copy env and configure values:
 
 ```bash
 cp .env.example .env
-# Edit .env: DATABASE_URL, LLM_API_KEY, VECTOR_DB_API_KEY, NEXT_PUBLIC_API_URL
+# Edit .env: DATABASE_URL, GROQ_API_KEY or LLM_API_KEY, NEXT_PUBLIC_API_URL
 ```
+
+Notes:
+- `GROQ_API_KEY` (or `LLM_API_KEY`) enables AI-generated chat/RAG responses.
+- Pinecone fields (`VECTOR_DB_API_KEY`, `PINECONE_*`) are optional when running local Chroma mode.
+- Local runtime artifacts (`backend/conversational_ecommerce.db`, `backend/chroma_db/`) are intentionally gitignored.
 
 ### 2. PostgreSQL
 
