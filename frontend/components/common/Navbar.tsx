@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getToken } from "@/lib/auth";
 
 const links = [
   { href: "/", label: "Home", icon: "🏠" },
@@ -16,6 +17,11 @@ const links = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isLogged, setIsLogged] = useState(false);
+
+  useEffect(() => {
+    setIsLogged(!!getToken());
+  }, [pathname]);
 
   return (
     <nav className="sticky top-0 z-50 backdrop-blur-xl bg-surface-900/80 border-b border-surface-500/30">
@@ -54,12 +60,20 @@ export default function Navbar() {
 
         {/* Auth + Mobile Toggle */}
         <div className="flex items-center gap-3">
-          <Link href="/auth/login" className="btn-ghost text-xs sm:text-sm">
-            Sign In
-          </Link>
-          <Link href="/auth/register" className="btn-primary text-xs sm:text-sm !px-4 !py-2">
-            Sign Up
-          </Link>
+          {isLogged ? (
+            <Link href="/account" className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface-700 hover:bg-surface-600 flex items-center justify-center transition-colors border border-surface-500/30" title="Account Settings">
+              <span className="text-lg">👤</span>
+            </Link>
+          ) : (
+            <>
+              <Link href="/auth/login" className="btn-ghost text-xs sm:text-sm">
+                Sign In
+              </Link>
+              <Link href="/auth/register" className="btn-primary text-xs sm:text-sm !px-4 !py-2">
+                Sign Up
+              </Link>
+            </>
+          )}
 
           {/* Mobile Hamburger */}
           <button

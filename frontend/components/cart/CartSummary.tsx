@@ -66,13 +66,28 @@ export default function CartSummary() {
   }
 
   if (error) {
+    const isAuthError =
+      error.toLowerCase().includes("auth") ||
+      error.toLowerCase().includes("log in") ||
+      error.toLowerCase().includes("login") ||
+      error.toLowerCase().includes("find");
+
     return (
       <div className="glass-card border-red-500/30 p-6 text-center">
         <span className="text-3xl mb-3 block">⚠️</span>
-        <p className="text-red-400 text-sm">{error}</p>
-        <button onClick={fetchCart} className="btn-secondary mt-4 text-xs">
-          Try Again
-        </button>
+        <p className="text-red-400 text-sm">
+          {isAuthError ? "Please sign in to view your cart." : error}
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+          <button onClick={fetchCart} className="btn-secondary text-xs w-full sm:w-auto">
+            Try Again
+          </button>
+          {isAuthError && (
+            <a href="/auth/login" className="btn-primary text-xs w-full sm:w-auto">
+              Sign In
+            </a>
+          )}
+        </div>
       </div>
     );
   }
