@@ -29,3 +29,5 @@ Thumbs.db
 backend/conversational_ecommerce.db
 backend/chroma_db/
 
+# AI context
+ai_progress.md
