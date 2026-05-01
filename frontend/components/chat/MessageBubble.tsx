@@ -22,7 +22,7 @@ export default function MessageBubble({ message, onFollowUp }: MessageBubbleProp
             className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
               isUser
                 ? "bg-brand-500 text-surface-900"
-                : "bg-surface-600 text-neon-green border border-neon-green/30"
+                : "bg-surface-600 text-accent border border-accent"
             }`}
           >
             {isUser ? "U" : "AI"}
@@ -50,7 +50,7 @@ export default function MessageBubble({ message, onFollowUp }: MessageBubbleProp
               <Link
                 key={pid}
                 href={`/products/${pid}`}
-                className="badge hover:bg-neon-green/20 transition-colors cursor-pointer"
+                className="badge hover:bg-accent-20 transition-colors cursor-pointer"
               >
                 Product #{pid} →
               </Link>
@@ -68,7 +68,7 @@ export default function MessageBubble({ message, onFollowUp }: MessageBubbleProp
                   key={i}
                   onClick={() => onFollowUp?.(prompt)}
                   className="text-xs px-3 py-1.5 rounded-full border border-surface-400/40 text-gray-300
-                    hover:border-neon-green/40 hover:text-neon-green hover:bg-neon-green/5
+                    hover:border-accent/40 hover:text-accent hover:bg-accent/5
                     transition-all duration-200"
                 >
                   {prompt}

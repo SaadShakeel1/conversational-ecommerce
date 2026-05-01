@@ -48,14 +48,14 @@ export default function HomePage() {
         {/* Grid background */}
         <div className="absolute inset-0 bg-grid-pattern bg-grid opacity-30" />
         {/* Gradient orbs */}
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-neon-green/5 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-1/4 w-80 h-80 bg-brand-500/5 rounded-full blur-3xl" />
 
         <div className="relative section-container py-20 sm:py-32 lg:py-40">
           <div className="text-center max-w-4xl mx-auto">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-neon-green/10 border border-neon-green/20 text-neon-green text-xs font-medium mb-8 animate-fade-in">
-              <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent-10 border border-accent/20 text-accent text-xs font-medium mb-8 animate-fade-in">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
               AI-Powered Shopping Experience
             </div>
 
@@ -63,7 +63,7 @@ export default function HomePage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-extrabold leading-tight animate-fade-up">
               <span className="text-white">Shop Smarter with</span>
               <br />
-              <span className="bg-gradient-to-r from-brand-300 via-neon-green to-brand-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-brand-300 via-accent to-brand-400 bg-clip-text text-transparent">
                 Conversational AI
               </span>
             </h1>
@@ -88,7 +88,7 @@ export default function HomePage() {
             <div className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-6 animate-fade-up [animation-delay:300ms]">
               {stats.map((stat) => (
                 <div key={stat.label} className="text-center">
-                  <div className="text-2xl sm:text-3xl font-display font-bold text-neon-green">
+                  <div className="text-2xl sm:text-3xl font-display font-bold text-accent">
                     {stat.value}
                   </div>
                   <div className="text-xs text-gray-500 mt-1 uppercase tracking-wider">
@@ -119,7 +119,7 @@ export default function HomePage() {
               className="glass-card-hover p-6 group"
               style={{ animationDelay: `${i * 80}ms` }}
             >
-              <div className="w-12 h-12 rounded-xl bg-neon-green/10 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-300 border border-neon-green/10">
+              <div className="w-12 h-12 rounded-xl bg-accent-10 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform duration-300 border border-accent/10">
                 {feat.icon}
               </div>
               <h3 className="text-white font-semibold text-lg mb-2">
@@ -137,7 +137,7 @@ export default function HomePage() {
       <section className="section-container py-20">
         <div className="glass-card p-12 sm:p-16 text-center relative overflow-hidden">
           {/* Glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-neon-green/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-accent-10 rounded-full blur-3xl" />
 
           <div className="relative">
             <h2 className="text-3xl sm:text-4xl font-display font-bold text-white mb-4">

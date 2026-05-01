@@ -82,6 +82,9 @@ export const api = {
         products: response.products.map(normalizeProductPrice),
       };
     },
+    reviews: async (id: number) => {
+      return fetchApi<import("./types").ReviewOut[]>(`/api/products/${id}/reviews`);
+    },
   },
   cart: {
     summary: () => fetchApi<CartSummaryOut>("/api/cart/summary"),

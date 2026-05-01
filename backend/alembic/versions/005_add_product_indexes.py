@@ -24,6 +24,9 @@ def upgrade() -> None:
     op.create_index("ix_products_color", "products", ["color"], unique=False)
     op.create_index("ix_products_size", "products", ["size"], unique=False)
 
+    # Ensure specs is JSONB on Postgres before creating GIN index
+    op.execute("ALTER TABLE products ALTER COLUMN specs TYPE JSONB USING specs::jsonb")
+
     # JSONB GIN index for specs key/value filtering
     op.create_index(
         "ix_products_specs_gin",

@@ -7,6 +7,7 @@ from decimal import Decimal
 from app.core.rate_limiter import limiter
 from app.db.session import get_db
 from app.schemas.product import ProductOut
+from app.schemas.review import ReviewOut
 from app.services import search_service, comparison_service
 from app.services import related_service
 from app.services import bundling_service
@@ -113,3 +114,10 @@ def product_bundle(
 ):
     products = bundling_service.suggest_bundle(db, product_id, limit=limit)
     return list(products)
+
+
+@router.get("/{product_id}/reviews", response_model=list[ReviewOut])
+def product_reviews(product_id: int, db: Session = Depends(get_db)):
+    from app.models.review import Review
+    reviews = db.query(Review).filter(Review.product_id == product_id).all()
+    return reviews

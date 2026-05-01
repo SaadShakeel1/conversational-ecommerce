@@ -12,6 +12,13 @@ export interface ProductOut {
   model_tag?: string;
 }
 
+export interface ReviewOut {
+  id: number;
+  product_id: number;
+  rating: number;
+  text?: string;
+}
+
 export interface CartItemOut {
   product_id: number;
   quantity: number;

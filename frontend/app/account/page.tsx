@@ -10,7 +10,7 @@ export default function AccountPage() {
     return (
       <div className="section-container py-20 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-3 border-neon-green border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-10 h-10 border-3 border-accent border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-500">Loading your account...</p>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default function AccountPage() {
         {/* Profile Card */}
         <div className="glass-card p-8">
           <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-neon-green flex items-center justify-center text-3xl text-surface-900 font-bold shadow-glow">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-brand-500 to-accent flex items-center justify-center text-3xl text-surface-900 font-bold shadow-glow">
               {user?.email?.charAt(0).toUpperCase() || "U"}
             </div>
             <div>
@@ -60,7 +60,7 @@ export default function AccountPage() {
                 {user?.email}
               </h2>
               <p className="text-sm text-gray-500 flex items-center gap-2 mt-1">
-                <span className="w-2 h-2 rounded-full bg-neon-green" />
+                <span className="w-2 h-2 rounded-full bg-accent" />
                 Active Account
               </p>
             </div>
@@ -87,28 +87,28 @@ export default function AccountPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8">
             <Link
               href="/orders/track"
-              className="glass-card p-4 text-center hover:border-neon-green/30 transition-all group"
+              className="glass-card p-4 text-center hover:border-accent transition-all group"
             >
               <span className="text-2xl block mb-2">📦</span>
-              <span className="text-xs text-gray-400 group-hover:text-neon-green transition-colors">
+              <span className="text-xs text-gray-400 group-hover:text-accent transition-colors">
                 Track Orders
               </span>
             </Link>
             <Link
               href="/cart"
-              className="glass-card p-4 text-center hover:border-neon-green/30 transition-all group"
+              className="glass-card p-4 text-center hover:border-accent transition-all group"
             >
               <span className="text-2xl block mb-2">🛒</span>
-              <span className="text-xs text-gray-400 group-hover:text-neon-green transition-colors">
+              <span className="text-xs text-gray-400 group-hover:text-accent transition-colors">
                 My Cart
               </span>
             </Link>
             <Link
               href="/chat"
-              className="glass-card p-4 text-center hover:border-neon-green/30 transition-all group"
+              className="glass-card p-4 text-center hover:border-accent transition-all group"
             >
               <span className="text-2xl block mb-2">💬</span>
-              <span className="text-xs text-gray-400 group-hover:text-neon-green transition-colors">
+              <span className="text-xs text-gray-400 group-hover:text-accent transition-colors">
                 Chat with AI
               </span>
             </Link>

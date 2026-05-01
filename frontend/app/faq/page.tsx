@@ -1,19 +1,34 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import { api } from "@/lib/api";
 import type { FAQOut } from "@/lib/types";
 
 export default function FAQPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<FAQOut[]>([]);
-  const [pending, setPending] = useState(false);
+  const [pending, setPending] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    const fetchInitialFaqs = async () => {
+      try {
+        const data = await api.faq.search("");
+        if (mounted) setResults(data);
+      } catch (e: unknown) {
+        if (mounted) setError(e instanceof Error ? e.message : "FAQ load failed");
+      } finally {
+        if (mounted) setPending(false);
+      }
+    };
+    fetchInitialFaqs();
+    return () => { mounted = false; };
+  }, []);
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!query.trim()) return;
     setPending(true);
     setError(null);
     setHasSearched(true);
@@ -96,7 +111,7 @@ export default function FAQPage() {
           {results.map((faq) => (
             <div key={faq.id} className="glass-card-hover p-6">
               <h3 className="text-white font-semibold mb-2 flex items-start gap-3">
-                <span className="text-neon-green text-lg leading-none">Q</span>
+                <span className="text-accent text-lg leading-none">Q</span>
                 {faq.question}
               </h3>
               <div className="flex items-start gap-3 ml-0">
@@ -125,21 +140,7 @@ export default function FAQPage() {
           </a>
         </div>
       )}
-
-      {/* Default State */}
-      {!hasSearched && !pending && (
-        <div className="max-w-3xl mx-auto">
-          <div className="glass-card p-8 text-center">
-            <span className="text-4xl mb-4 block">❓</span>
-            <h3 className="text-lg font-semibold text-white mb-2">
-              What can we help you with?
-            </h3>
-            <p className="text-gray-500 text-sm">
-              Type your question above to search our FAQ database.
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+

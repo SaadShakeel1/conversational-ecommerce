@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
+import { ThemeProvider } from "@/lib/ThemeContext";
 import Navbar from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
 import CursorTrail from "@/components/common/CursorTrail";
@@ -29,10 +30,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col">
-        <CursorTrail />
-        <Navbar />
-        <main className="flex-1">{children}</main>
-        <Footer />
+        <ThemeProvider>
+          <CursorTrail />
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );

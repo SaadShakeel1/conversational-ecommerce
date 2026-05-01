@@ -76,7 +76,7 @@ export default function PromoPage() {
           </span>
           <h3
             className={`text-2xl font-display font-bold mb-2 ${
-              result.valid ? "text-neon-green" : "text-red-400"
+              result.valid ? "text-accent" : "text-red-400"
             }`}
           >
             {result.valid ? "Code Valid!" : "Invalid Code"}

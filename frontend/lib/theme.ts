@@ -1,0 +1,158 @@
+export type ThemeId = "green" | "purple" | "blue" | "orange";
+
+export interface ThemeDefinition {
+  id: ThemeId;
+  label: string;
+  icon: string;
+  /** CSS variable values injected on <html data-theme="…"> */
+  vars: Record<string, string>;
+  /** Particle colours for CursorTrail */
+  particles: Array<{ r: number; g: number; b: number }>;
+  /** Cursor / connection-line glow colour */
+  glowRgb: string;
+}
+
+export const THEMES: ThemeDefinition[] = [
+  {
+    id: "green",
+    label: "Neon Green",
+    icon: "🟢",
+    vars: {
+      "--color-bg":           "#0a0a0a",
+      "--color-surface":      "#111111",
+      "--color-surface-alt":  "#1a1a1a",
+      "--color-border":       "#2a2a2a",
+      "--color-primary":      "#00e66d",
+      "--color-primary-glow": "rgba(0,230,109,0.20)",
+      "--color-accent":       "#00ff88",
+      "--color-accent-dim":   "#00cc6a",
+      "--color-accent-10":    "rgba(0,255,136,0.10)",
+      "--color-accent-20":    "rgba(0,255,136,0.20)",
+      "--color-accent-30":    "rgba(0,255,136,0.30)",
+      "--color-glow-sm":      "0 0 10px rgba(0,255,136,0.10)",
+      "--color-glow-md":      "0 0 20px rgba(0,255,136,0.15)",
+      "--color-glow-lg":      "0 0 40px rgba(0,255,136,0.20)",
+      "--color-gradient-from":"#4dffa1",
+      "--color-gradient-via": "#00ff88",
+      "--color-gradient-to":  "#1aff86",
+      "--color-logo-text":    "#0a0a0a",
+      "--color-grid":         "rgba(0,255,136,0.03)",
+    },
+    particles: [
+      { r: 0,  g: 255, b: 65  },
+      { r: 74, g: 222, b: 128 },
+      { r: 16, g: 185, b: 129 },
+      { r: 34, g: 197, b: 94  },
+      { r: 52, g: 211, b: 153 },
+      { r: 6,  g: 95,  b: 70  },
+    ],
+    glowRgb: "74,222,128",
+  },
+  {
+    id: "purple",
+    label: "Purple Neon",
+    icon: "🟣",
+    vars: {
+      "--color-bg":           "#0A0A0A",
+      "--color-surface":      "#130a1e",
+      "--color-surface-alt":  "#1c1030",
+      "--color-border":       "#2a1a45",
+      "--color-primary":      "#8B5CF6",
+      "--color-primary-glow": "rgba(139,92,246,0.20)",
+      "--color-accent":       "#A78BFA",
+      "--color-accent-dim":   "#7C3AED",
+      "--color-accent-10":    "rgba(167,139,250,0.10)",
+      "--color-accent-20":    "rgba(167,139,250,0.20)",
+      "--color-accent-30":    "rgba(167,139,250,0.30)",
+      "--color-glow-sm":      "0 0 10px rgba(139,92,246,0.15)",
+      "--color-glow-md":      "0 0 20px rgba(139,92,246,0.20)",
+      "--color-glow-lg":      "0 0 40px rgba(139,92,246,0.25)",
+      "--color-gradient-from":"#C4B5FD",
+      "--color-gradient-via": "#A78BFA",
+      "--color-gradient-to":  "#8B5CF6",
+      "--color-logo-text":    "#ffffff",
+      "--color-grid":         "rgba(139,92,246,0.04)",
+    },
+    particles: [
+      { r: 167, g: 139, b: 250 },
+      { r: 139, g: 92,  b: 246 },
+      { r: 196, g: 181, b: 253 },
+      { r: 124, g: 58,  b: 237 },
+      { r: 109, g: 40,  b: 217 },
+      { r: 216, g: 180, b: 254 },
+    ],
+    glowRgb: "167,139,250",
+  },
+  {
+    id: "blue",
+    label: "Blue Tech",
+    icon: "🔵",
+    vars: {
+      "--color-bg":           "#0B1220",
+      "--color-surface":      "#111c2e",
+      "--color-surface-alt":  "#192438",
+      "--color-border":       "#1e3050",
+      "--color-primary":      "#3B82F6",
+      "--color-primary-glow": "rgba(59,130,246,0.20)",
+      "--color-accent":       "#60A5FA",
+      "--color-accent-dim":   "#2563EB",
+      "--color-accent-10":    "rgba(96,165,250,0.10)",
+      "--color-accent-20":    "rgba(96,165,250,0.20)",
+      "--color-accent-30":    "rgba(96,165,250,0.30)",
+      "--color-glow-sm":      "0 0 10px rgba(59,130,246,0.15)",
+      "--color-glow-md":      "0 0 20px rgba(59,130,246,0.20)",
+      "--color-glow-lg":      "0 0 40px rgba(59,130,246,0.25)",
+      "--color-gradient-from":"#BFDBFE",
+      "--color-gradient-via": "#60A5FA",
+      "--color-gradient-to":  "#3B82F6",
+      "--color-logo-text":    "#ffffff",
+      "--color-grid":         "rgba(59,130,246,0.04)",
+    },
+    particles: [
+      { r: 96,  g: 165, b: 250 },
+      { r: 59,  g: 130, b: 246 },
+      { r: 147, g: 197, b: 253 },
+      { r: 37,  g: 99,  b: 235 },
+      { r: 29,  g: 78,  b: 216 },
+      { r: 191, g: 219, b: 254 },
+    ],
+    glowRgb: "96,165,250",
+  },
+  {
+    id: "orange",
+    label: "Orange Energy",
+    icon: "🟠",
+    vars: {
+      "--color-bg":           "#111827",
+      "--color-surface":      "#1a2235",
+      "--color-surface-alt":  "#212d40",
+      "--color-border":       "#2d3748",
+      "--color-primary":      "#F97316",
+      "--color-primary-glow": "rgba(249,115,22,0.20)",
+      "--color-accent":       "#FDBA74",
+      "--color-accent-dim":   "#EA580C",
+      "--color-accent-10":    "rgba(253,186,116,0.10)",
+      "--color-accent-20":    "rgba(253,186,116,0.20)",
+      "--color-accent-30":    "rgba(253,186,116,0.30)",
+      "--color-glow-sm":      "0 0 10px rgba(249,115,22,0.15)",
+      "--color-glow-md":      "0 0 20px rgba(249,115,22,0.20)",
+      "--color-glow-lg":      "0 0 40px rgba(249,115,22,0.25)",
+      "--color-gradient-from":"#FED7AA",
+      "--color-gradient-via": "#FDBA74",
+      "--color-gradient-to":  "#F97316",
+      "--color-logo-text":    "#ffffff",
+      "--color-grid":         "rgba(249,115,22,0.04)",
+    },
+    particles: [
+      { r: 253, g: 186, b: 116 },
+      { r: 249, g: 115, b: 22  },
+      { r: 254, g: 215, b: 170 },
+      { r: 234, g: 88,  b: 12  },
+      { r: 251, g: 146, b: 60  },
+      { r: 194, g: 65,  b: 12  },
+    ],
+    glowRgb: "249,115,22",
+  },
+];
+
+export const DEFAULT_THEME: ThemeId = "green";

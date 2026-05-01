@@ -31,7 +31,7 @@ export default function AuthForm({ mode, onSubmit, error, loading }: AuthFormPro
       <div className="glass-card p-8 sm:p-10">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500/20 to-neon-green/20 flex items-center justify-center mx-auto mb-4 border border-neon-green/20">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-500/20 to-accent/20 flex items-center justify-center mx-auto mb-4 border border-accent/20">
             <span className="text-2xl">{isLogin ? "🔐" : "✨"}</span>
           </div>
           <h1 className="text-2xl font-display font-bold text-white">{title}</h1>
@@ -120,7 +120,7 @@ export default function AuthForm({ mode, onSubmit, error, loading }: AuthFormPro
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <Link
             href={isLogin ? "/auth/register" : "/auth/login"}
-            className="text-neon-green hover:text-brand-300 transition-colors font-medium"
+            className="text-accent hover:text-brand-300 transition-colors font-medium"
           >
             {isLogin ? "Sign up" : "Sign in"}
           </Link>

@@ -126,7 +126,7 @@ export default function CartSummary() {
         {cart.items.map((item: CartItemOut) => (
           <div
             key={item.product_id}
-            className="glass-card flex items-center justify-between p-4 group hover:border-neon-green/20 transition-all"
+            className="glass-card flex items-center justify-between p-4 group hover:border-accent/20 transition-all"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-surface-700 flex items-center justify-center text-xl">
@@ -140,7 +140,7 @@ export default function CartSummary() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <p className="text-neon-green font-semibold text-sm">
+              <p className="text-accent font-semibold text-sm">
                 ${(item.price * item.quantity).toFixed(2)}
               </p>
               <button
@@ -173,7 +173,7 @@ export default function CartSummary() {
         <div className="divider mb-4" />
         <div className="flex items-center justify-between">
           <span className="text-gray-300 font-medium">Total</span>
-          <span className="text-2xl font-bold text-neon-green">
+          <span className="text-2xl font-bold text-accent">
             ${total.toFixed(2)}
           </span>
         </div>

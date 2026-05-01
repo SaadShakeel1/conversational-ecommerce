@@ -95,7 +95,7 @@ export default function ProductsPage() {
       {compareIds.length > 0 && (
         <div className="glass-card p-4 mb-6 flex items-center justify-between animate-fade-in">
           <p className="text-sm text-gray-300">
-            <span className="text-neon-green font-semibold">{compareIds.length}</span>{" "}
+            <span className="text-accent font-semibold">{compareIds.length}</span>{" "}
             product{compareIds.length > 1 ? "s" : ""} selected for comparison
           </p>
           <div className="flex items-center gap-3">

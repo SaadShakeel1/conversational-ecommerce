@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import type { ProductOut } from "@/lib/types";
+import type { ProductOut, ReviewOut } from "@/lib/types";
 
 export default function ProductPage({ params }: { params: { id: string } }) {
   const [product, setProduct] = useState<ProductOut | null>(null);
+  const [reviews, setReviews] = useState<ReviewOut[]>([]);
   const [pending, setPending] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -16,8 +17,12 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     (async () => {
       setPending(true);
       try {
-        const data = await api.products.get(Number(params.id));
-        setProduct(data);
+        const [productData, reviewsData] = await Promise.all([
+          api.products.get(Number(params.id)),
+          api.products.reviews(Number(params.id))
+        ]);
+        setProduct(productData);
+        setReviews(reviewsData);
       } catch (e: unknown) {
         setError(e instanceof Error ? e.message : "Failed to load product");
       } finally {
@@ -77,7 +82,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
     <div className="section-container py-8 sm:py-12 animate-fade-in">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-gray-500 mb-8">
-        <Link href="/products" className="hover:text-neon-green transition-colors">
+        <Link href="/products" className="hover:text-accent transition-colors">
           Products
         </Link>
         <span>/</span>
@@ -109,7 +114,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {product.name}
           </h1>
 
-          <div className="text-3xl font-bold text-neon-green mb-4">
+          <div className="text-3xl font-bold text-accent mb-4">
             ${product.price.toFixed(2)}
           </div>
 
@@ -136,7 +141,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             {product.model_tag && (
               <div className="glass-card p-3">
                 <p className="text-xs text-gray-500 uppercase tracking-wider">Model</p>
-                <p className="text-sm text-neon-green font-medium mt-1">{product.model_tag}</p>
+                <p className="text-sm text-accent font-medium mt-1">{product.model_tag}</p>
               </div>
             )}
           </div>
@@ -187,7 +192,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
 
           {/* Success toast */}
           {addedToCart && (
-            <div className="mt-4 p-3 rounded-xl bg-neon-green/10 border border-neon-green/30 text-neon-green text-sm animate-fade-in">
+            <div className="mt-4 p-3 rounded-xl bg-accent-10 border border-accent text-accent text-sm animate-fade-in">
               ✓ Added to your cart!{" "}
               <Link href="/cart" className="underline font-medium">
                 View cart →
@@ -195,6 +200,34 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Reviews Section */}
+      <div className="max-w-5xl mx-auto mt-16 pt-16 border-t border-border">
+        <h2 className="text-2xl font-display font-bold text-white mb-6">Customer Reviews</h2>
+        {reviews.length === 0 ? (
+          <p className="text-gray-500">No reviews yet for this product.</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="glass-card p-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex text-accent">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span key={i} className={i < review.rating ? "text-accent" : "text-surface-400"}>
+                        ★
+                      </span>
+                    ))}
+                  </div>
+                  <span className="text-white font-medium ml-2">{review.rating} / 5</span>
+                </div>
+                {review.text && (
+                  <p className="text-gray-400 text-sm leading-relaxed">"{review.text}"</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

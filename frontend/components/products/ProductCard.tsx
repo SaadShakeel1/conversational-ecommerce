@@ -28,7 +28,7 @@ export default function ProductCard({
             : "🛍️"}
         </div>
         {/* Price Tag */}
-        <div className="absolute top-3 right-3 bg-surface-900/80 backdrop-blur-sm text-neon-green font-bold text-sm px-3 py-1 rounded-full border border-neon-green/20">
+        <div className="absolute top-3 right-3 bg-surface-900/80 backdrop-blur-sm text-accent font-bold text-sm px-3 py-1 rounded-full border border-accent/20">
           ${product.price.toFixed(2)}
         </div>
         {/* Category Badge */}
@@ -42,7 +42,7 @@ export default function ProductCard({
       {/* Details */}
       <div className="p-4">
         <Link href={`/products/${product.id}`}>
-          <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1 hover:text-neon-green transition-colors">
+          <h3 className="font-semibold text-white text-sm mb-1 line-clamp-1 hover:text-accent transition-colors">
             {product.name}
           </h3>
         </Link>
@@ -78,8 +78,8 @@ export default function ProductCard({
               onClick={() => onCompare(product.id)}
               className={`p-2 rounded-lg border transition-all duration-200 ${
                 compareSelected
-                  ? "border-neon-green bg-neon-green/10 text-neon-green"
-                  : "border-surface-400/40 text-gray-400 hover:border-neon-green/40 hover:text-neon-green"
+                  ? "border-accent bg-accent-10 text-accent"
+                  : "border-surface-400/40 text-gray-400 hover:border-accent/40 hover:text-accent"
               }`}
               title={compareSelected ? "Remove from comparison" : "Add to comparison"}
             >

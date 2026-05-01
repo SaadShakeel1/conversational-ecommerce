@@ -64,7 +64,7 @@ export default function OrderTrackPage() {
   const statusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case "delivered":
-        return "text-neon-green bg-neon-green/10 border-neon-green/20";
+        return "text-accent bg-accent-10 border-accent/20";
       case "shipped":
         return "text-blue-400 bg-blue-400/10 border-blue-400/20";
       case "processing":
@@ -153,7 +153,7 @@ export default function OrderTrackPage() {
             {result.total != null && (
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-400">Total</span>
-                <span className="text-lg font-bold text-neon-green">
+                <span className="text-lg font-bold text-accent">
                   ${result.total.toFixed(2)}
                 </span>
               </div>

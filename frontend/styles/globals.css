@@ -4,6 +4,35 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap");
 
+/* ═══════════════════════════════════════════════════════════
+   Default theme tokens (Green Neon) — overridden per-theme
+   by ThemeProvider via inline style on <html>
+═══════════════════════════════════════════════════════════ */
+:root {
+  --color-bg:           #0a0a0a;
+  --color-surface:      #111111;
+  --color-surface-alt:  #1a1a1a;
+  --color-border:       #2a2a2a;
+  --color-primary:      #00e66d;
+  --color-primary-glow: rgba(0,230,109,0.20);
+  --color-accent:       #00ff88;
+  --color-accent-dim:   #00cc6a;
+  --color-accent-10:    rgba(0,255,136,0.10);
+  --color-accent-20:    rgba(0,255,136,0.20);
+  --color-accent-30:    rgba(0,255,136,0.30);
+  --color-glow-sm:      0 0 10px rgba(0,255,136,0.10);
+  --color-glow-md:      0 0 20px rgba(0,255,136,0.15);
+  --color-glow-lg:      0 0 40px rgba(0,255,136,0.20);
+  --color-gradient-from:#4dffa1;
+  --color-gradient-via: #00ff88;
+  --color-gradient-to:  #1aff86;
+  --color-logo-text:    #0a0a0a;
+  --color-grid:         rgba(0,255,136,0.03);
+
+  /* Transition speed for theme switching */
+  --theme-transition: 350ms;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -15,42 +44,50 @@
     scroll-behavior: smooth;
   }
 
+  /* Smooth colour transitions on theme change */
+  html * {
+    transition:
+      background-color var(--theme-transition) ease,
+      border-color     var(--theme-transition) ease,
+      color            var(--theme-transition) ease,
+      box-shadow       var(--theme-transition) ease;
+  }
+
+  /* But don't slow down animations / transforms */
+  html *,
+  html *::before,
+  html *::after {
+    transition-property: background-color, border-color, color, box-shadow;
+  }
+
   body {
-    @apply bg-surface-900 text-gray-100 font-sans antialiased;
-    background-image:
-      radial-gradient(ellipse at top, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
-      radial-gradient(ellipse at bottom right, rgba(0, 255, 136, 0.02) 0%, transparent 50%);
+    @apply font-sans antialiased;
+    background-color: var(--color-bg);
+    color: #f3f4f6; /* gray-100 */
     min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at top,    var(--color-primary-glow) 0%, transparent 55%),
+      radial-gradient(ellipse at bottom right, var(--color-accent-10) 0%, transparent 55%);
   }
 
   ::selection {
-    background-color: rgba(0, 255, 136, 0.2);
+    background-color: var(--color-accent-20);
     color: #fff;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: #111111;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: #333333;
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: #00e66d;
-  }
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track  { background: var(--color-bg); }
+  ::-webkit-scrollbar-thumb  { background: var(--color-border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-accent); }
 }
 
 @layer components {
   /* ─── Glass Card ─── */
   .glass-card {
-    @apply bg-surface-800/60 backdrop-blur-xl border border-surface-500/30 rounded-2xl;
+    background-color: color-mix(in srgb, var(--color-surface) 60%, transparent);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--color-accent-30);
+    border-radius: 1rem;
   }
 
   .glass-card-hover {
@@ -58,51 +95,79 @@
   }
 
   .glass-card-hover:hover {
-    @apply border-neon-green/30 shadow-glow -translate-y-1;
+    border-color: var(--color-accent-30);
+    box-shadow: var(--color-glow-md);
+    transform: translateY(-4px);
   }
 
   /* ─── Neon Buttons ─── */
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
-      bg-gradient-to-r from-brand-500 to-neon-green text-surface-900
-      hover:shadow-glow-lg hover:scale-[1.02]
       active:scale-[0.98]
       transition-all duration-200 ease-out
       disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: var(--color-logo-text);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: var(--color-glow-lg);
+    transform: scale(1.02);
   }
 
   .btn-secondary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm
-      bg-surface-700 text-gray-200 border border-surface-400/50
-      hover:border-neon-green/40 hover:text-neon-green hover:shadow-glow-sm
       active:scale-[0.98]
       transition-all duration-200 ease-out
       disabled:opacity-40 disabled:cursor-not-allowed;
+    background-color: var(--color-surface-alt);
+    color: #e5e7eb;
+    border: 1px solid var(--color-border);
+  }
+
+  .btn-secondary:hover:not(:disabled) {
+    border-color: var(--color-accent-30);
+    color: var(--color-accent);
+    box-shadow: var(--color-glow-sm);
   }
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm
-      text-gray-400 hover:text-neon-green hover:bg-surface-700/50
       transition-all duration-200;
+    color: #9ca3af;
+  }
+
+  .btn-ghost:hover {
+    color: var(--color-accent);
+    background-color: color-mix(in srgb, var(--color-surface-alt) 50%, transparent);
   }
 
   /* ─── Input Fields ─── */
   .input-field {
-    @apply w-full px-4 py-3 rounded-xl bg-surface-700/80 border border-surface-400/40 text-gray-100
-      placeholder:text-gray-500
-      focus:outline-none focus:border-neon-green/60 focus:ring-2 focus:ring-neon-green/20
+    @apply w-full px-4 py-3 rounded-xl text-gray-100 placeholder:text-gray-500
+      focus:outline-none
       transition-all duration-200;
+    background-color: color-mix(in srgb, var(--color-surface-alt) 80%, transparent);
+    border: 1px solid var(--color-border);
+  }
+
+  .input-field:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 2px var(--color-accent-10);
   }
 
   /* ─── Badge / Tag ─── */
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-      bg-neon-green/10 text-neon-green border border-neon-green/20;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+    background-color: var(--color-accent-10);
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent-20);
   }
 
   .badge-neutral {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium
-      bg-surface-600 text-gray-300 border border-surface-400/40;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium text-gray-300;
+    background-color: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
   }
 
   /* ─── Section Containers ─── */
@@ -116,8 +181,13 @@
   }
 
   .page-title {
-    @apply text-3xl sm:text-4xl lg:text-5xl font-display font-bold
-      bg-gradient-to-r from-white via-brand-200 to-neon-green bg-clip-text text-transparent;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-display font-bold bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      var(--color-gradient-from),
+      var(--color-gradient-via),
+      var(--color-gradient-to)
+    );
   }
 
   .page-subtitle {
@@ -126,25 +196,47 @@
 
   /* ─── Skeleton Loading ─── */
   .skeleton {
-    @apply bg-gradient-to-r from-surface-700 via-surface-600 to-surface-700 bg-[length:200%_100%] rounded-lg animate-shimmer;
+    @apply bg-gradient-to-r bg-[length:200%_100%] rounded-lg animate-shimmer;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-surface-alt) 0%,
+      var(--color-border) 50%,
+      var(--color-surface-alt) 100%
+    );
   }
 
   /* ─── Divider ─── */
   .divider {
-    @apply h-px bg-gradient-to-r from-transparent via-surface-400/50 to-transparent;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-border),
+      transparent
+    );
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-300 to-neon-green bg-clip-text text-transparent;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      var(--color-gradient-from),
+      var(--color-gradient-to)
+    );
   }
 
   .neon-border {
-    @apply border border-neon-green/30;
+    border: 1px solid var(--color-accent-30);
   }
 
   .neon-glow {
-    box-shadow: 0 0 20px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+    box-shadow: var(--color-glow-md), inset 0 0 20px var(--color-accent-10);
   }
+
+  /* Accent colour helpers via CSS vars (usable anywhere) */
+  .text-accent   { color: var(--color-accent); }
+  .bg-accent-10  { background-color: var(--color-accent-10); }
+  .border-accent { border-color: var(--color-accent-30); }
 }

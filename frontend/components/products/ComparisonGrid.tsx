@@ -77,7 +77,7 @@ export default function ComparisonGrid({ products, onRemove }: ComparisonGridPro
               key={row.label}
               className={`${
                 i % 2 === 0 ? "bg-surface-800/30" : ""
-              } hover:bg-neon-green/5 transition-colors`}
+              } hover:bg-accent/5 transition-colors`}
             >
               <td className="py-3 px-4 text-gray-400 font-medium text-xs uppercase tracking-wider">
                 {row.label}
@@ -89,7 +89,7 @@ export default function ComparisonGrid({ products, onRemove }: ComparisonGridPro
                   <td
                     key={p.id}
                     className={`py-3 px-4 ${
-                      isPrice ? "text-neon-green font-semibold" : "text-gray-300"
+                      isPrice ? "text-accent font-semibold" : "text-gray-300"
                     }`}
                   >
                     {val}

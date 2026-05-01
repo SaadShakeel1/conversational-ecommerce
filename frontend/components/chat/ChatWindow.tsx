@@ -25,7 +25,7 @@ export default function ChatWindow() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-surface-500/30">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-neon-green animate-pulse" />
+          <div className="w-3 h-3 rounded-full bg-accent animate-pulse" />
           <div>
             <h2 className="text-sm font-semibold text-white">ConvoShop AI</h2>
             <p className="text-xs text-gray-500">Always ready to help</p>
@@ -47,7 +47,7 @@ export default function ChatWindow() {
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center animate-fade-in">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/20 to-neon-green/20 flex items-center justify-center mb-6 border border-neon-green/20">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-500/20 to-accent/20 flex items-center justify-center mb-6 border border-accent/20">
               <span className="text-3xl">🛒</span>
             </div>
             <h3 className="text-xl font-display font-semibold text-white mb-2">
@@ -63,7 +63,7 @@ export default function ChatWindow() {
                   key={s}
                   onClick={() => sendMessage(s)}
                   className="text-left text-sm px-4 py-3 rounded-xl border border-surface-400/30 text-gray-400
-                    hover:border-neon-green/30 hover:text-neon-green hover:bg-neon-green/5
+                    hover:border-accent hover:text-accent hover:bg-accent/5
                     transition-all duration-200"
                 >
                   &ldquo;{s}&rdquo;
@@ -85,9 +85,9 @@ export default function ChatWindow() {
         {pending && (
           <div className="flex items-center gap-2 text-gray-500 text-sm animate-fade-in">
             <div className="flex gap-1">
-              <span className="w-2 h-2 bg-neon-green/60 rounded-full animate-typing-dot" />
-              <span className="w-2 h-2 bg-neon-green/60 rounded-full animate-typing-dot [animation-delay:0.2s]" />
-              <span className="w-2 h-2 bg-neon-green/60 rounded-full animate-typing-dot [animation-delay:0.4s]" />
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-typing-dot" />
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-typing-dot [animation-delay:0.2s]" />
+              <span className="w-2 h-2 bg-accent/60 rounded-full animate-typing-dot [animation-delay:0.4s]" />
             </div>
             AI is thinking...
           </div>
