@@ -366,7 +366,7 @@ export default function ProductPage({ params }: { params: { id: string } }) {
             <p className="text-gray-400 text-sm">
               Sign in to leave a review for this product.
             </p>
-            <Link href="/auth" className="btn-secondary whitespace-nowrap">
+            <Link href="/auth/login" className="btn-secondary whitespace-nowrap">
               Sign In
             </Link>
           </div>
