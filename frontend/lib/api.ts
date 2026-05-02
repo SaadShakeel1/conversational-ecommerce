@@ -13,7 +13,7 @@ import type {
 } from "./types";
 import { authHeaders } from "./auth";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
 
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -24,7 +24,18 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
       ...options?.headers,
     },
   });
-  if (!res.ok) throw new Error(await res.text());
+  if (!res.ok) {
+    let errorMessage = await res.text();
+    try {
+      const parsed = JSON.parse(errorMessage);
+      if (parsed.detail) {
+        errorMessage = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+      }
+    } catch (e) {
+      // Not JSON, keep original text
+    }
+    throw new Error(errorMessage);
+  }
   return res.json();
 }
 
@@ -85,6 +96,12 @@ export const api = {
     reviews: async (id: number) => {
       return fetchApi<import("./types").ReviewOut[]>(`/api/products/${id}/reviews`);
     },
+    createReview: async (id: number, rating: number, text?: string) => {
+      return fetchApi<import("./types").ReviewOut>(`/api/products/${id}/reviews`, {
+        method: "POST",
+        body: JSON.stringify({ rating, text }),
+      });
+    },
   },
   cart: {
     summary: () => fetchApi<CartSummaryOut>("/api/cart/summary"),
@@ -138,7 +155,18 @@ export const api = {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData,
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) {
+        let errorMessage = await res.text();
+        try {
+          const parsed = JSON.parse(errorMessage);
+          if (parsed.detail) {
+            errorMessage = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail);
+          }
+        } catch (e) {
+          // Not JSON
+        }
+        throw new Error(errorMessage);
+      }
       return (await res.json()) as LoginResponse;
     },
     me: () => fetchApi<AuthUser>("/api/auth/me"),
