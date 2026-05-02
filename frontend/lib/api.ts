@@ -85,6 +85,12 @@ export const api = {
     reviews: async (id: number) => {
       return fetchApi<import("./types").ReviewOut[]>(`/api/products/${id}/reviews`);
     },
+    createReview: async (id: number, rating: number, text?: string) => {
+      return fetchApi<import("./types").ReviewOut>(`/api/products/${id}/reviews`, {
+        method: "POST",
+        body: JSON.stringify({ rating, text }),
+      });
+    },
   },
   cart: {
     summary: () => fetchApi<CartSummaryOut>("/api/cart/summary"),

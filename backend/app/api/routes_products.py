@@ -1,16 +1,20 @@
 """Product listing, details, comparison."""
-from fastapi import APIRouter, Depends, Query, HTTPException, Request
+from fastapi import APIRouter, Depends, Query, HTTPException, Request, status
 from sqlalchemy.orm import Session
-from typing import Any, Optional, List
+from typing import Any, Optional
 from decimal import Decimal
 
 from app.core.rate_limiter import limiter
 from app.db.session import get_db
 from app.schemas.product import ProductOut
-from app.schemas.review import ReviewOut
+from app.schemas.review import ReviewOut, ReviewCreate
 from app.services import search_service, comparison_service
 from app.services import related_service
 from app.services import bundling_service
+from app.api.routes_auth import get_current_user
+from app.models.review import Review
+from app.models.product import Product
+from app.models.user import User
 
 router = APIRouter()
 
@@ -118,6 +122,30 @@ def product_bundle(
 
 @router.get("/{product_id}/reviews", response_model=list[ReviewOut])
 def product_reviews(product_id: int, db: Session = Depends(get_db)):
-    from app.models.review import Review
+    """Get all reviews for a product — public, no auth required."""
     reviews = db.query(Review).filter(Review.product_id == product_id).all()
     return reviews
+
+
+@router.post("/{product_id}/reviews", response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
+def create_review(
+    product_id: int,
+    review_in: ReviewCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Submit a review for a product. Requires authentication (Bearer token)."""
+    product = db.query(Product).filter(Product.id == product_id).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    review = Review(
+        product_id=product_id,
+        user_id=current_user.id,
+        rating=review_in.rating,
+        text=review_in.text,
+    )
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
