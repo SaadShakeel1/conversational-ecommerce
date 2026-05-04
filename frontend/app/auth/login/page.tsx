@@ -15,8 +15,12 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.push("/account");
-    } catch {
-      setLocalError(error || "Login failed. Please check your credentials.");
+    } catch (e: unknown) {
+      setLocalError(
+        e instanceof Error && e.message
+          ? e.message
+          : "Login failed. Please check your credentials."
+      );
     }
   };
 

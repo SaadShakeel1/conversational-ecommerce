@@ -7,18 +7,16 @@ import type { AuthUser } from "@/lib/types";
 
 export function useAuth() {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isAuthenticated = !!user;
 
-  // Load user on mount if token exists
+  // Load user on mount (client-only) if a token exists in localStorage
   useEffect(() => {
-    const token = getToken();
-    if (!token) {
-      setLoading(false);
-      return;
-    }
+    const token = getToken(); // returns null on server (window undefined guard)
+    if (!token) return;
+    setLoading(true);
     api.auth
       .me()
       .then(setUser)

@@ -100,6 +100,7 @@ def create_order_from_cart(
     if not items_to_add:
         raise ValueError("Cart has no valid items to order")
 
+    applied_promo = None
     # Apply optional promo discount to total only (not per-item price).
     if promo_code:
         promo_result = promo_service.validate_promo(db, promo_code)
@@ -107,6 +108,7 @@ def create_order_from_cart(
             discount_percent = Decimal(str(promo_result["discount_percent"]))
             discount_amount = (order_total * discount_percent) / Decimal("100")
             order_total = max(order_total - discount_amount, Decimal("0.00"))
+            applied_promo = promo_code
 
     order = Order(user_id=cart.user_id, order_status="confirmed", total=order_total)
     db.add(order)
@@ -117,11 +119,10 @@ def create_order_from_cart(
         oi = OrderItem(order_id=order.id, product_id=ci.product_id, quantity=oi_qty, price=unit_price)
         db.add(oi)
 
-        # Decrement inventory after creating the order line.
-        inv = inv_by_pid.get(ci.product_id)
-        if inv is None:
-            raise ValueError(f"Missing inventory for product id {ci.product_id}")
         inv.quantity = int(inv.quantity or 0) - oi_qty
+
+    if applied_promo:
+        promo_service.mark_promo_as_used(db, applied_promo)
 
     db.commit()
 

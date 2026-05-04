@@ -3,6 +3,19 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings
 
+# Resolve .env paths: prefer backend/.env, fall back to project root .env.
+# This ensures the app works regardless of which directory uvicorn/alembic is
+# launched from.
+_this_file = Path(__file__).resolve()          # backend/app/config.py
+_backend_dir = _this_file.parents[1]           # backend/
+_project_root = _this_file.parents[2]          # project root/
+
+_backend_env = _backend_dir / ".env"
+_root_env = _project_root / ".env"
+
+# Build the ordered list of env files that actually exist
+_env_files = [str(p) for p in [_backend_env, _root_env] if p.exists()]
+
 
 class Settings(BaseSettings):
     # Required from environment (.env or process env)
@@ -10,7 +23,7 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     llm_api_key: str = ""
     vector_db_api_key: str = ""
-    
+
     # Chroma Vector DB configuration
     chroma_persist_dir: str = "./chroma_db"
 
@@ -39,10 +52,9 @@ class Settings(BaseSettings):
     class Config:
         env_prefix = ""
         extra = "ignore"
-        extra = "ignore"
-        # Make env loading deterministic regardless of where uvicorn/alembic is launched from.
-        # This resolves to: project_root/.env (since this file lives in backend/app/).
-        env_file = str(Path(__file__).resolve().parents[2] / ".env")
+        # Load backend/.env first (if it exists), then fall back to root .env.
+        # Values in the first file take precedence.
+        env_file = _env_files if _env_files else None
         env_file_encoding = "utf-8"
 
 
