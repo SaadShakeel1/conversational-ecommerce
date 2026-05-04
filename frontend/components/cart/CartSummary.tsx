@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api";
-import type { CartItemOut, CartSummaryOut } from "@/lib/types";
+import type { CartItemOut, CartSummaryOut, PromoValidateOut } from "@/lib/types";
 
 export default function CartSummary() {
   const router = useRouter();
@@ -12,6 +12,12 @@ export default function CartSummary() {
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null);
   const [checkingOut, setCheckingOut] = useState(false);
+
+  // Promo code state
+  const [promoInput, setPromoInput] = useState("");
+  const [promoResult, setPromoResult] = useState<PromoValidateOut | null>(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
 
   const fetchCart = useCallback(async () => {
     setPending(true);
@@ -42,11 +48,43 @@ export default function CartSummary() {
     }
   };
 
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim();
+    if (!code) return;
+    setPromoLoading(true);
+    setPromoResult(null);
+    try {
+      const result = await api.orders.validatePromo(code);
+      setPromoResult(result);
+      if (result.valid) {
+        setAppliedPromo(code);
+      } else {
+        setAppliedPromo(null);
+      }
+    } catch (e: unknown) {
+      setPromoResult({
+        valid: false,
+        message: e instanceof Error ? e.message : "Failed to validate code",
+      });
+      setAppliedPromo(null);
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoInput("");
+    setPromoResult(null);
+    setAppliedPromo(null);
+  };
+
   const handleCheckout = async () => {
     setCheckingOut(true);
     setError(null);
     try {
-      const order = await api.orders.checkout();
+      const order = await api.orders.checkout(
+        appliedPromo ? { promoCode: appliedPromo } : undefined
+      );
       router.push(`/orders/track?orderId=${order.order_id}`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Checkout failed");
@@ -163,6 +201,57 @@ export default function CartSummary() {
         ))}
       </div>
 
+      {/* Promo Code Section */}
+      <div className="glass-card p-5 mb-4">
+        <label htmlFor="promo-code" className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-2 block">
+          Promo Code
+        </label>
+        {appliedPromo ? (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm font-mono font-medium">
+                🏷️ {appliedPromo.toUpperCase()}
+              </span>
+              <span className="text-green-400 text-xs">
+                {promoResult?.discount_percent}% off
+              </span>
+            </div>
+            <button
+              onClick={handleRemovePromo}
+              className="text-xs text-gray-500 hover:text-red-400 transition-colors"
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            <input
+              id="promo-code"
+              type="text"
+              value={promoInput}
+              onChange={(e) => setPromoInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+              placeholder="Enter code (e.g. WELCOME10)"
+              className="flex-1 px-3 py-2 rounded-lg bg-surface-800 border border-surface-600 text-white text-sm
+                placeholder:text-gray-600 focus:outline-none focus:border-accent/50 transition-colors"
+            />
+            <button
+              onClick={handleApplyPromo}
+              disabled={promoLoading || !promoInput.trim()}
+              className="btn-secondary text-xs px-4 disabled:opacity-40"
+            >
+              {promoLoading ? "..." : "Apply"}
+            </button>
+          </div>
+        )}
+        {promoResult && !promoResult.valid && (
+          <p className="text-red-400 text-xs mt-2">{promoResult.message}</p>
+        )}
+        {promoResult && promoResult.valid && !appliedPromo && (
+          <p className="text-green-400 text-xs mt-2">{promoResult.message}</p>
+        )}
+      </div>
+
       {/* Summary Card */}
       <div className="glass-card p-6 neon-border">
         {cart.text_summary && (
@@ -171,11 +260,46 @@ export default function CartSummary() {
           </p>
         )}
         <div className="divider mb-4" />
+
+        {/* Subtotal */}
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-gray-500 text-sm">Subtotal</span>
+          <span className="text-gray-300 text-sm">${total.toFixed(2)}</span>
+        </div>
+
+        {/* Discount row (only when promo is applied) */}
+        {promoResult?.valid && promoResult.discount_percent && (
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-green-400 text-sm">
+              Discount ({promoResult.discount_percent}%)
+            </span>
+            <span className="text-green-400 text-sm">
+              -${((total * promoResult.discount_percent) / 100).toFixed(2)}
+            </span>
+          </div>
+        )}
+
+        <div className="divider my-3" />
+
+        {/* Final Total */}
         <div className="flex items-center justify-between">
           <span className="text-gray-300 font-medium">Total</span>
-          <span className="text-2xl font-bold text-accent">
-            ${total.toFixed(2)}
-          </span>
+          <div className="text-right">
+            {promoResult?.valid && promoResult.discount_percent ? (
+              <>
+                <span className="text-gray-500 line-through text-sm mr-2">
+                  ${total.toFixed(2)}
+                </span>
+                <span className="text-2xl font-bold text-accent">
+                  ${(total * (1 - promoResult.discount_percent / 100)).toFixed(2)}
+                </span>
+              </>
+            ) : (
+              <span className="text-2xl font-bold text-accent">
+                ${total.toFixed(2)}
+              </span>
+            )}
+          </div>
         </div>
         <button
           onClick={handleCheckout}

@@ -327,7 +327,9 @@ def seed():
         # 7. Promo codes
         # ------------------------------------------------------------------
         promos = [
-            PromoCode(code="WELCOME10", discount_percent=10.0, is_active=True, expires_at=datetime.now(timezone.utc) + timedelta(days=90)),
+            PromoCode(code=f"WELCOME{i}", discount_percent=float(i), is_active=True, expires_at=datetime.now(timezone.utc) + timedelta(days=90))
+            for i in range(10, 100, 10)
+        ] + [
             PromoCode(code="SUMMER25", discount_percent=25.0, is_active=True, expires_at=datetime.now(timezone.utc) + timedelta(days=60)),
             PromoCode(code="EXPIRED5", discount_percent=5.0, is_active=True, expires_at=datetime.now(timezone.utc) - timedelta(days=1)),
         ]

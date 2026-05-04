@@ -15,8 +15,12 @@ export default function RegisterPage() {
     try {
       await register(email, password);
       router.push("/account");
-    } catch {
-      setLocalError(error || "Registration failed. Please try again.");
+    } catch (e: unknown) {
+      setLocalError(
+        e instanceof Error && e.message
+          ? e.message
+          : "Registration failed. Please try again."
+      );
     }
   };
 
